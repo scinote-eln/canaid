@@ -27,7 +27,6 @@ module Canaid
 
           # Parse arguments differently whether the permission
           # is generic or not
-          byebug
           if holder.is_generic?(name)
             user = args.length == 0 ? current_user : args[0]
             return holder.eval_generic(name, user)
