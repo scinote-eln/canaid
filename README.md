@@ -9,7 +9,7 @@ Canaid is an authorization aid / permission helper that allows you to define var
 
 ## Requirements
 
-* [rails](https://github.com/rails/rails) ~> 5.1.1
+* [rails](https://github.com/rails/rails) >= 4
 * [devise](https://github.com/plataformatec/devise) >= 3.4.1
 
 ## Install
