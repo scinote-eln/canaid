@@ -36,8 +36,12 @@ module Canaid
             return holder.eval(name, user, obj)
           end
         else
-          super.method_missing(method, *args, &block)
+          super
         end
+      end
+
+      def respond_to_missing?(method, *args)
+        method.to_s.match(/^can_(.+)\?$/) || super
       end
     end
   end
