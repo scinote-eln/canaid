@@ -26,11 +26,12 @@ Then run `bundle install`.
 
 ### Registering permissions
 
-You can register new permission/s from anywhere within your Rails application (or any child engine) by following one of the 3 methods outlined below:
+You can register new permission/s by writing the following code in Ruby files inside `app/permissions/**/*.rb` in your Rails application (or any child engines):
 
 **A)**
 
 ```ruby
+# app/permissions/permissions.rb
 # can <permission_name>, <object_class>, <priority>, { <function(user, obj)> }
 Canaid::Permissions.register do
   can :view_team_projects, Team, 10 do |user, team|
@@ -59,13 +60,14 @@ can_update_project?(project)
 can_update_project?(user, project)
 ```
 
-> **Note** For where user is not provided, Devise's `current_user` variable is automatically used.
+> **Note!** For where user is not provided, Devise's `current_user` variable is automatically used.
 
 **B)**
 
 Alternatively, to define multiple permissions for the same object class:
 
 ```ruby
+# app/permissions/permissions.rb
 # can <permission_name>, <priority>, { <function(user, obj)> }
 Canaid::Permissions.register_for(Team) do
   can :create_new_project, 10 do |user, team|
@@ -96,6 +98,7 @@ can_view_team_projects?(user, team)
 Lastly, you can define generic permissions that don't have a related object class:
 
 ```ruby
+# app/permissions/permissions.rb
 # can <permission_name>, <priority>, { <function(user)> }
 Canaid::Permissions.register_generic do
   can :invite_users, 10 do |user|
@@ -135,16 +138,17 @@ When calling `can_update_project?`, this would eval to the following:
 <perm_2_eval> && <perm_1_eval>
 ```
 
-### Structuring
+### Custom permissions path
 
-Permissions can be defined anywhere in Rails application. One suggestion is to create a new folder `permisions`, and group the permissions by object class, e.g.:
+To change the location/path of the permission files, define an initializer inside your application (e.g. `config/initializers/canaid.rb`) with the following code:
 
+```ruby
+Canaid.configure do |config|
+  config.permissions_path = <your_path_to_permission_files>
+end
 ```
-/app/permissions/global_permissions.rb
-/app/permissions/teams_permissions.rb
-/app/permissions/projects_permissions.rb
-/app/permissions/...
-```
+
+> **Important!** All the files that match this provided path are then `require`-d during the initialization of Rails server, so be careful when you change this to something different.
 
 ## Copyright
 

@@ -1,11 +1,13 @@
 ##
 # This class makes sure that PermissionsHelper is included
-# in ActionControllers and ActionViews.
+# in ActionControllers and ActionViews, as well as that the
+# permissions are registered from the correct path.
 
 module Canaid
   class Railtie < Rails::Railtie
     config.after_initialize do
-      Dir[File.expand_path 'app/permissions/**/*.rb'].each do |f|
+      Dir[File.expand_path(Canaid.configuration.permissions_path)].each do |f|
+        # By requiring those files, Ruby will execute them
         require(f)
       end
     end
