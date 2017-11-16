@@ -26,7 +26,7 @@ Then run `bundle install`.
 
 ### Registering permissions
 
-You can register new permission/s by writing the following code in Ruby files inside `app/permissions/**/*.rb` in your Rails application (or any child engines):
+You can register new permission/s by writing the following code in Ruby files inside `app/permissions/**/*.rb` in your Rails application:
 
 **A)**
 
@@ -138,15 +138,17 @@ When calling `can_update_project?`, this would eval to the following:
 <perm_2_eval> && <perm_1_eval>
 ```
 
-### Custom permissions path
+### Custom permissions paths
 
-To change the location/path of the permission files, define an initializer inside your application (e.g. `config/initializers/canaid.rb`) with the following code:
+To change the locations/paths of the permission files, define an initializer inside your application (e.g. `config/initializers/canaid.rb`) with the following code:
 
 ```ruby
 Canaid.configure do |config|
-  config.permissions_path = <your_path_to_permission_files>
+  config.permissions_paths = [<your_paths_to_permission_files>]
 end
 ```
+
+This way, it's also easy to specify multiple paths by using e.g. `<<` operator.
 
 > **Important!** All the files that match this provided path are then `require`-d during the initialization of Rails server, so be careful when you change this to something different.
 

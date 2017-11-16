@@ -1,9 +1,9 @@
 module Canaid
   class Configuration
-    attr_accessor :permissions_path
+    attr_accessor :permissions_paths
 
     def initialize
-      @permissions_path = 'app/permissions/**/*.rb'
+      @permissions_paths = ['app/permissions/**/*.rb']
     end
   end
 end

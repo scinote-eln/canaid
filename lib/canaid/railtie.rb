@@ -6,7 +6,11 @@
 module Canaid
   class Railtie < Rails::Railtie
     config.after_initialize do
-      Dir[File.expand_path(Canaid.configuration.permissions_path)].each do |f|
+      files = []
+      Canaid.configuration.permissions_paths.each do |p|
+        files |= Dir[File.expand_path(p)]
+      end
+      files.each do |f|
         # By requiring those files, Ruby will execute them
         require(f)
       end
