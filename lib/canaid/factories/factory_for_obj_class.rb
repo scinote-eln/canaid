@@ -9,7 +9,11 @@ module Canaid
         @obj_class = obj_class
       end
 
-      def can(name, priority, &block)
+      def can(name, *args, &block)
+        raise ArgumentError.new(
+          "wrong number of arguments (given #{args.length + 1}, expected 1-2)"
+        ) if (args && args.length > 1)
+        priority = args ? args[0] : nil
         Canaid::PermissionsHolder.instance.register(
           name, @obj_class, priority, &block
         )

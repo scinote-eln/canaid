@@ -32,21 +32,21 @@ You can register new permission/s by writing the following code in Ruby files in
 
 ```ruby
 # app/permissions/permissions.rb
-# can <permission_name>, <object_class>, <priority>, { <function(user, obj)> }
+# can <permission_name>, <object_class>, <priority?>, { <function(user, obj)> }
 Canaid::Permissions.register do
   can :view_team_projects, Team, 10 do |user, team|
     user.logged_in? &&
     team.users.include?(user)
   end
 
-  can :update_project, Project, 10 do |user, project|
+  can :update_project, Project do |user, project|
     user.logged_in? &&
     project.users.include?(user)
   end
 end
 ```
 
-The number `10` is a priority that dictates the order in which the permission checks are evaluated if multiple permissions are registered for the same name. This is reserved for future.
+The argument `10` is a priority that dictates the order in which the permission checks are evaluated if multiple permissions are registered for the same name. **The argument is optional and can be avoided.** This is reserved for future.
 
 > **Important!** Each permission also has an object class specified alongside, to which the passed object itself is checked when permission is queried.
 
@@ -68,7 +68,7 @@ Alternatively, to define multiple permissions for the same object class:
 
 ```ruby
 # app/permissions/permissions.rb
-# can <permission_name>, <priority>, { <function(user, obj)> }
+# can <permission_name>, <priority?>, { <function(user, obj)> }
 Canaid::Permissions.register_for(Team) do
   can :create_new_project, 10 do |user, team|
     user.logged_in? &&
@@ -76,7 +76,7 @@ Canaid::Permissions.register_for(Team) do
     user_is_team_admin?(user, team)
   end
 
-  can :view_team_projects, 10 do |user, team|
+  can :view_team_projects do |user, team|
     user.logged_in? &&
     team.users.include?(user)
   end
@@ -99,9 +99,14 @@ Lastly, you can define generic permissions that don't have a related object clas
 
 ```ruby
 # app/permissions/permissions.rb
-# can <permission_name>, <priority>, { <function(user)> }
+# can <permission_name>, <priority?>, { <function(user)> }
 Canaid::Permissions.register_generic do
   can :invite_users, 10 do |user|
+    user.logged_in? &&
+    user.admin?
+  end
+
+  can :delete_users do |user|
     user.logged_in? &&
     user.admin?
   end
@@ -113,6 +118,9 @@ This will result in the following helper methods to be available to all controll
 ```ruby
 can_invite_users?
 can_invite_users?(user)
+
+can_delete_users?
+can_delete_users?(user)
 ```
 
 ### Multiple registrations

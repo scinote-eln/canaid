@@ -3,10 +3,13 @@
 # so they can be evaluated at run-time.
 
 require 'singleton'
+require 'active_support/hash_with_indifferent_access'
 
 module Canaid
   class PermissionsHolder
     include Singleton
+
+    DEFAULT_PRIORITY = 10
 
     def initialize
       @cans = HashWithIndifferentAccess.new
@@ -15,12 +18,14 @@ module Canaid
 
     def register(name, obj_class, priority, &block)
       check_if_obj_class_match(name, obj_class)
-      add_permission(name, obj_class, priority, &block)
+      _priority = priority == nil ? DEFAULT_PRIORITY : priority
+      add_permission(name, obj_class, _priority, &block)
     end
 
     def register_generic(name, priority, &block)
       check_if_obj_class_match(name, :generic)
-      add_permission(name, :generic, priority, &block)
+      _priority = priority == nil ? DEFAULT_PRIORITY : priority
+      add_permission(name, :generic, _priority, &block)
     end
 
     def has_permission?(name)
