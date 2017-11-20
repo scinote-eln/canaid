@@ -12,32 +12,46 @@ module Canaid
     DEFAULT_PRIORITY = 10
 
     def initialize
-      @cans = HashWithIndifferentAccess.new
-      @can_obj_classes = HashWithIndifferentAccess.new
+      unregister_all
     end
 
     def register(name, obj_class, priority, &block)
+      validate_name(name)
+      validate_obj_class(obj_class)
+      validate_priority(priority)
+      validate_block(&block)
       check_if_obj_class_match(name, obj_class)
+
       _priority = priority == nil ? DEFAULT_PRIORITY : priority
       add_permission(name, obj_class, _priority, &block)
     end
 
     def register_generic(name, priority, &block)
+      validate_name(name)
+      validate_priority(priority)
+      validate_block(&block)
       check_if_obj_class_match(name, :generic)
+
       _priority = priority == nil ? DEFAULT_PRIORITY : priority
       add_permission(name, :generic, _priority, &block)
     end
 
     def has_permission?(name)
+      validate_name(name)
+
       @cans.key?(name)
     end
 
     def is_generic?(name)
+      validate_name(name)
+      check_if_exists(name)
+
       @can_obj_classes.key?(name) &&
       @can_obj_classes[name] == :generic
     end
 
     def eval(name, user, obj)
+      validate_name(name)
       check_if_exists(name)
 
       # Check if correct object class was specified
@@ -54,6 +68,7 @@ module Canaid
     end
 
     def eval_generic(name, user)
+      validate_name(name)
       check_if_exists(name)
 
       # Check if correct object class was specified
@@ -69,7 +84,35 @@ module Canaid
       return result
     end
 
+    def unregister_all
+      @cans = HashWithIndifferentAccess.new
+      @can_obj_classes = HashWithIndifferentAccess.new
+    end
+
     private
+
+    def validate_name(name)
+      raise ArgumentError.new(
+        'Name must be a Symbol or a String!'
+      ) unless [Symbol, String].include?(name.class)
+    end
+
+    def validate_obj_class(obj_class)
+      raise ArgumentError.new('Nil object class!') if obj_class == nil
+    end
+
+    def validate_priority(priority)
+      return if priority == nil
+      raise ArgumentError.new(
+        'Priority must be an Integer!'
+      ) unless priority.is_a?(Integer)
+    end
+
+    def validate_block(&block)
+      raise ArgumentError.new(
+        'No block provided for the permission!'
+      ) if block == nil
+    end
 
     def check_if_obj_class_match(name, obj_class)
       if @can_obj_classes.key?(name) &&
