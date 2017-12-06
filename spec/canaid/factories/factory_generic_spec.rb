@@ -32,7 +32,7 @@ describe Canaid::Factories::FactoryGeneric do
     end
 
     it 'should raise error with priority not an Integer' do
-      [{}, [], 5.6, "test", :test].each do |priority|
+      [{}, [], 5.6, 'test', :test].each do |priority|
         expect { @factory.can('haz_cheeseburger', priority) {} }.to raise_error(ArgumentError)
       end
     end

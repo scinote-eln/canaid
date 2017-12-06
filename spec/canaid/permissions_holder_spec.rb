@@ -43,7 +43,7 @@ describe Canaid::PermissionsHolder do
     end
 
     it 'should raise error with priority not an Integer' do
-      [{}, [], 5.6, "test", :test].each do |priority|
+      [{}, [], 5.6, 'test', :test].each do |priority|
         expect { @holder.register('haz_cheeseburger', String, priority) {} }.to raise_error(ArgumentError)
       end
     end
@@ -80,7 +80,7 @@ describe Canaid::PermissionsHolder do
     end
 
     it 'should raise error with priority not an Integer' do
-      [{}, [], 5.6, "test", :test].each do |priority|
+      [{}, [], 5.6, 'test', :test].each do |priority|
         expect { @holder.register_generic('haz_cheeseburger', priority) {} }.to raise_error(ArgumentError)
       end
     end
@@ -127,12 +127,14 @@ describe Canaid::PermissionsHolder do
     end
   end
 
-  describe 'eval(name, user, obj)' do
+  describe 'eval(name, user, obj, scope)' do
     it 'should evaluate with correct arguments' do
       @holder.register(:haz_cheeseburger, String, 10) { true }
-      expect(@holder.eval(:haz_cheeseburger, nil, "lala")).to be true
+      expect(@holder.eval(:haz_cheeseburger, nil, 'lala')).to be true
+      expect(@holder.eval(:haz_cheeseburger, nil, 'lala', self)).to be true
       @holder.register(:haz_cheesecake, Fixnum, 10) { true }
       expect(@holder.eval(:haz_cheesecake, nil, 15)).to be true
+      expect(@holder.eval(:haz_cheesecake, nil, 15, self)).to be true
     end
 
     it 'should raise error if name is not String or Symbol' do
@@ -153,6 +155,9 @@ describe Canaid::PermissionsHolder do
       @holder.register(:haz_cheesecake, String, 11) { true }
       expect(@holder.is_generic?(:haz_cheeseburger)).to be true
       expect(@holder.is_generic?(:haz_cheesecake)).to be false
+      expect(@holder.eval_generic(:haz_cheeseburger, nil)).to be true
+      expect(@holder.eval_generic(:haz_cheeseburger, nil, self)).to be true
+      expect { @holder.eval_generic(:haz_cheesecake, nil) }.to raise_error(ArgumentError)
     end
 
     it 'should raise error if name is not String or Symbol' do
@@ -166,11 +171,11 @@ describe Canaid::PermissionsHolder do
     it 'should unregister all permissions' do
       @holder.register(:haz_cheeseburger, String, 11) { true }
       @holder.register_generic(:haz_cheesecake, 10) { true }
-      expect(@holder.eval(:haz_cheeseburger, nil, "test")).to be true
+      expect(@holder.eval(:haz_cheeseburger, nil, 'test')).to be true
       expect(@holder.eval_generic(:haz_cheesecake, nil)).to be true
       @holder.unregister_all
       expect(@holder.has_permission?(:haz_cheeseburger)).to be false
-      expect { @holder.eval(:haz_cheeseburger, nil, "test") }.to raise_error(ArgumentError)
+      expect { @holder.eval(:haz_cheeseburger, nil, 'test') }.to raise_error(ArgumentError)
       expect { @holder.eval_generic(:haz_cheesecake, nil) }.to raise_error(ArgumentError)
       expect(@holder.has_permission?(:haz_cheesecake)).to be false
     end

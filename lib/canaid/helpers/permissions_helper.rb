@@ -27,13 +27,15 @@ module Canaid
 
           # Parse arguments differently whether the permission
           # is generic or not
+          # Passing self (scope) allows callers to call other permission
+          # checks from within a permission
           if holder.is_generic?(name)
             user = args.length == 0 ? current_user : args[0]
-            return holder.eval_generic(name, user)
+            return holder.eval_generic(name, user, self)
           else
             user = args.length == 1 ? current_user : args[0]
             obj = args.length == 1 ? args[0] : args[1]
-            return holder.eval(name, user, obj)
+            return holder.eval(name, user, obj, self)
           end
         else
           super

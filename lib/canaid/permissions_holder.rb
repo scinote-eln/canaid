@@ -50,7 +50,7 @@ module Canaid
       @can_obj_classes[name] == :generic
     end
 
-    def eval(name, user, obj)
+    def eval(name, user, obj, scope = nil)
       validate_name(name)
       check_if_exists(name)
 
@@ -61,13 +61,17 @@ module Canaid
 
       result = true
       @cans[name].each do |perm|
-        result &&= perm[:block].call(user, obj)
+        if scope
+          result &&= scope.instance_exec(user, obj, &perm[:block])
+        else
+          result &&= perm[:block].call(user, obj)
+        end
       end
 
       return result
     end
 
-    def eval_generic(name, user)
+    def eval_generic(name, user, scope = nil)
       validate_name(name)
       check_if_exists(name)
 
@@ -78,7 +82,11 @@ module Canaid
 
       result = true
       @cans[name].each do |perm|
-        result &&= perm[:block].call(user)
+        if scope
+          result &&= scope.instance_exec(user, &perm[:block])
+        else
+          result &&= perm[:block].call(user)
+        end
       end
 
       return result
