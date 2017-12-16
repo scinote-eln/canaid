@@ -162,11 +162,11 @@ This way, it's also easy to specify multiple paths by using e.g. `<<` operator.
 
 ### Print
 
-To print all permissions in a semi-friendly way, you can call the following function:
+To print all permissions in a semi-friendly way, you can call the following Rake tasks from the Rails application:
 
 ```
-Canaid::PermissionsHolder.instance.print # Code-compatible print
-Canaid::PermissionsHolder.instance.print(true) # Markdown-styled print output
+rake canaid:print # Code-compatible print to console
+rake canaid:print_md # Markdown-styled print that is saved to permissions.md
 ```
 
 ## Copyright
