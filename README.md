@@ -160,6 +160,15 @@ This way, it's also easy to specify multiple paths by using e.g. `<<` operator.
 
 > **Important!** All the files that match this provided path are then `require`-d during the initialization of Rails server, so be careful when you change this to something different.
 
+### Print
+
+To print all permissions in a semi-friendly way, you can call the following Rake tasks from the Rails application:
+
+```
+rake canaid:print # Code-compatible print to console
+rake canaid:print_md # Markdown-styled print that is saved to permissions.md
+```
+
 ## Copyright
 
 This Gem is licensed under the [MIT license](MIT-LICENSE).

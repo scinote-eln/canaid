@@ -28,5 +28,10 @@ module Canaid
         include Canaid::Helpers::PermissionsHelper
       end
     end
+
+    # Include Canaid's Rake task in Rails rake tasks
+    rake_tasks do
+      load 'tasks/print.rake'
+    end
   end
 end
