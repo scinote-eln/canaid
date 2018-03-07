@@ -9,6 +9,12 @@ module Canaid
   class PermissionsHolder
     include Singleton
 
+    # This is a "fake" private class, so we can use it
+    # for generic permissions
+    class Generic
+    end
+    private_constant :Generic
+
     DEFAULT_PRIORITY = 10
 
     def initialize
@@ -30,10 +36,10 @@ module Canaid
       validate_name(name)
       validate_priority(priority)
       validate_block(&block)
-      check_if_obj_class_match(name, :generic)
+      check_if_obj_class_match(name, Generic)
 
       _priority = priority == nil ? DEFAULT_PRIORITY : priority
-      add_permission(name, :generic, _priority, &block)
+      add_permission(name, Generic, _priority, &block)
     end
 
     def has_permission?(name)
@@ -47,7 +53,7 @@ module Canaid
       check_if_exists(name)
 
       @can_obj_classes.key?(name) &&
-      @can_obj_classes[name] == :generic
+      @can_obj_classes[name] == Generic.name
     end
 
     def eval(name, user, obj, scope = nil)
@@ -57,7 +63,7 @@ module Canaid
       # Check if correct object class was specified
       raise ArgumentError.new(
         "Object of incorrect class specified when calling permission #{name}!"
-      ) if obj.class != @can_obj_classes[name]
+      ) if obj.class.name != @can_obj_classes[name]
 
       result = true
       @cans[name].each do |perm|
@@ -78,7 +84,7 @@ module Canaid
       # Check if correct object class was specified
       raise ArgumentError.new(
         "Non-generic permission #{name} called with generic arguments!"
-      ) if @can_obj_classes[name] != :generic
+      ) if @can_obj_classes[name] != Generic.name
 
       result = true
       @cans[name].each do |perm|
@@ -124,7 +130,7 @@ module Canaid
 
     def check_if_obj_class_match(name, obj_class)
       if @can_obj_classes.key?(name) &&
-         @can_obj_classes[name] != obj_class
+         @can_obj_classes[name] != obj_class.name
         raise ArgumentError.new(
           "Different object classes for same permission #{name} registered!"
         )
@@ -138,7 +144,7 @@ module Canaid
     end
 
     def add_permission(name, obj_class, priority, &block)
-      @can_obj_classes[name] = obj_class
+      @can_obj_classes[name] = obj_class.name
       @cans[name] = [] unless @cans.key?(name)
       idx = @cans[name].index {|p| p[:priority] > priority} || -1
       @cans[name].insert(idx, { priority: priority, block: block })
