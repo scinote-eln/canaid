@@ -1,5 +1,7 @@
 namespace :canaid do
-  MD_FILE_PATH = 'permissions.md'
+  MD_FILE_PATH = 'permissions.md'.freeze
+  GENERIC_CLASS_NAME = 'Canaid::PermissionsHolder::Generic'.freeze
+  CAN_REGEX = /^( *)can +.* +(do|\{) +\|.+\| *$/
 
   def print(markdown = false)
     # Fetch variables off the permissions holder instance
@@ -9,12 +11,14 @@ namespace :canaid do
 
     output = []
 
-    obj_classes = can_obj_classes.values.select { |oc| oc != :generic }
+    obj_classes = can_obj_classes
+                  .values
+                  .select { |oc| oc != GENERIC_CLASS_NAME }
     # Start with generic
-    obj_classes.unshift(:generic)
+    obj_classes.unshift(GENERIC_CLASS_NAME)
 
     obj_classes.uniq.each do |obj_class|
-      if obj_class == :generic
+      if obj_class == GENERIC_CLASS_NAME
         output << '## Generic permissions'
       else
         output << "## #{obj_class} permissions"
@@ -27,31 +31,43 @@ namespace :canaid do
       permission_names.each do |pn|
         next if cans[pn].empty?
 
-        # Extract parameters from first block
-        md = /.*\|(.*)\|.*/.match(cans[pn][0][:block].source.split("\n")[0])
-        params = md && md.length > 1 ? md[1] : ''
-        if markdown
-          output << ["**can_#{pn}?(#{params})**", '', '```' ]
-        else
-          output << "can_#{pn}?(#{params})"
-        end
 
-        # Print individual permissions
+        output << "### #{pn}"
+        output << ''
         perms = cans[pn].sort { |e1, e2| e1[:priority] <=> e2[:priority] }
         perms.each_with_index do |perm, idx|
-          src = perm[:block].source
-          md = /\A\s*can.*(do|\{)\s*(\|.*\|)?(.*)(end|\})\s*\z/m.match(src)
-          next unless md.length == 5
-          res = md[3]
-                .strip
-                .split("\n")
-                .map(&:strip)
-                .map { |v| "  #{v}" }
-                .join("\n")
-          res = "#{res} &&" if perms.length > 1 && idx < perms.length - 1
-          output << res
+          output << '```ruby' if markdown
+
+          source = perm[:block].source
+
+          # Get rid of empty lines and uneccesary indentation
+          md = CAN_REGEX.match(source)
+          ws = md && md.length > 1 ? md[1] : ''
+
+          source_lines = perm[:block].source.split("\n")
+          idx_s, idx_f = 0, 0
+          source_lines.each_with_index do |line, i|
+            idx_s = i && break if line =~ CAN_REGEX
+          end
+          source_lines.reverse.each_with_index do |line, i|
+            idx_f = i && break if line =~ /^.*end.*$/
+          end
+          idx_f = source_lines.length - 1 - idx_f
+
+          # Specify the location where permission is defined
+          sl = perm[:block].source_location
+          output << "# #{sl[0]}, line #{sl[1]}"
+
+          # Print the Proc itself
+          source_lines[idx_s..idx_f].each do |line|
+            output << (line.start_with?(ws) ? line[ws.length..-1] : line)
+          end
+
+          output << '```' if markdown
+
+          output << '' if idx < perms.length - 1
         end
-        output << '```' if markdown
+
         output << ''
       end
     end
