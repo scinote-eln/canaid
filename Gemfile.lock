@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    canaid (1.0.2)
+    canaid (1.0.4)
       devise (>= 3.4.1)
       docile (>= 1.1.0)
       rails (>= 4)
