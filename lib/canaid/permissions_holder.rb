@@ -61,9 +61,9 @@ module Canaid
       check_if_exists(name)
 
       # Check if correct object class was specified
-      raise ArgumentError.new(
-        "Object of incorrect class specified when calling permission #{name}!"
-      ) if obj.class.name != @can_obj_classes[name]
+      unless obj.is_a?(@can_obj_classes[name].constantize)
+        raise ArgumentError, "Object of incorrect class specified when calling permission #{name}!"
+      end
 
       result = true
       @cans[name].each do |perm|
